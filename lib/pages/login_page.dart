@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:menu_app/cubits/user_cubit.dart';
+import 'package:menu_app/models/user_model.dart';
 import 'package:menu_app/services/databaseService.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -23,8 +26,13 @@ class _LoginPageState extends State<LoginPage> {
     //   email text not null,
     //   password text not null
     // )    ''');
-    await dbService.addUser();
+    // await dbService.addUser();
+    User? res =  await dbService.findUser("admin");
     print("initState Called");
+    context.read<UserCubit>().update({"admin": 1, "email": "admin", "password": "123"});
+    final state = context.read<UserCubit>().state;
+    print("state is");
+    print(state.email);
   }
 
   @override

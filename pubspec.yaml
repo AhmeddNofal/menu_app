@@ -39,6 +39,7 @@ dependencies:
   path: ^1.9.0
   sqflite_common_ffi: ^2.3.3
   sqlite3_flutter_libs: ^0.5.29+1
+  flutter_bloc: ^9.0.0
 
 dev_dependencies:
   flutter_test:

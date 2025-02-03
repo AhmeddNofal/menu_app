@@ -1,15 +1,14 @@
-import 'dart:nativewrappers/_internal/vm/lib/ffi_native_type_patch.dart';
-
 class User {
   int? id;
-  late bool admin;
-  late String email;
-  late String password;
+  bool? admin;
+  String? email;
+  String? password;
 
-  User(this.admin, this.email, this.password);
+
+  User({this.admin, this.email, this.password});
 
   User.fromMap(Map<String, dynamic> map) {
-    id = map["id"];
+    id = map["_id"];
     admin = map["admin"] == 1;
     email = map["email"];
     password = map["password"];

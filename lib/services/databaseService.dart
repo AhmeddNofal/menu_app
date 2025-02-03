@@ -1,10 +1,11 @@
 import 'dart:io';
 
+import 'package:menu_app/models/user_model.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DatabaseService {
-  Database? db;
+  late Database db;
 
   Future open() async {
     final dbDirPath = await getDatabasesPath();
@@ -25,7 +26,19 @@ class DatabaseService {
   }
 
   Future addUser() async {
-    var res = await db?.insert("Users", { "admin": 1, "email": "dsf", "password": "fjhdj"});
+    var res = await db
+        .insert("Users", {"admin": 1, "email": "admin", "password": "123"});
     return res;
+  }
+
+  Future<User?> findUser(String email) async {
+    List<Map<String, dynamic>> maps =
+        await db.query("Users", where: 'email = ?', whereArgs: [email]);
+    if (maps.isNotEmpty) {
+      print(maps);
+
+      return User.fromMap(maps.first);
+    }
+    return null;
   }
 }
