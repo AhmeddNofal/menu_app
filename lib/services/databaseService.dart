@@ -25,7 +25,7 @@ class DatabaseService {
   }
 
   Future addUser() async {
-    var res = await db?.insert("Users", {"admin": 1, "email": "dsf", "password": "fjhdj"});
+    var res = await db?.insert("Users", { "admin": 1, "email": "dsf", "password": "fjhdj"});
     return res;
   }
 }
