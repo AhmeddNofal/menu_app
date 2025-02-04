@@ -27,7 +27,7 @@ class DatabaseService {
 
   Future addUser() async {
     var res = await db
-        .insert("Users", {"admin": 1, "email": "admin", "password": "123"});
+        .insert("Users", {"admin": 0, "email": "guest", "password": "123"});
     return res;
   }
 
@@ -35,8 +35,6 @@ class DatabaseService {
     List<Map<String, dynamic>> maps =
         await db.query("Users", where: 'email = ?', whereArgs: [email]);
     if (maps.isNotEmpty) {
-      print(maps);
-
       return User.fromMap(maps.first);
     }
     return null;
