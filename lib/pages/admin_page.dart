@@ -1,4 +1,9 @@
+import 'dart:io';
+
+import 'package:day_picker/day_picker.dart';
+import 'package:day_picker/model/day_in_week.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class AdminPage extends StatefulWidget {
   const AdminPage({super.key});
@@ -11,6 +16,7 @@ class _AdminPageState extends State<AdminPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   int _selectedIndex = 0;
+  File? _selectedImage;
 
   onItemTapped(int index) {
     setState(() {
@@ -51,8 +57,13 @@ class _AdminPageState extends State<AdminPage>
         opacity: _selectedIndex == 0 ? 1 : 0,
         child: FloatingActionButton(
           backgroundColor: Colors.red[600],
-          onPressed: () {_showAddMealDialog(context);},
-          child: const Icon(Icons.add, color: Colors.white,),
+          onPressed: () {
+            _showAddMealDialog(context);
+          },
+          child: const Icon(
+            Icons.add,
+            color: Colors.white,
+          ),
         ),
       ),
     );
@@ -98,38 +109,111 @@ class _AdminPageState extends State<AdminPage>
   }
 
   void _showAddMealDialog(BuildContext context) {
+    final List<DayInWeek> _days = [
+      DayInWeek("S", dayKey: "sunday"),
+      DayInWeek("M", dayKey: "monday"),
+      DayInWeek("T", dayKey: "tuesday"),
+      DayInWeek("W", dayKey: "wednesday"),
+      DayInWeek("T", dayKey: "thursday"),
+      DayInWeek("F", dayKey: "friday"),
+      DayInWeek("S", dayKey: "saturday"),
+    ];
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Add Meal'),
+          title: const Center(child: Text('Add Meal')),
+          scrollable: true,
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(
-                decoration: const InputDecoration(labelText: 'Meal Title'),
+              const SizedBox(height: 8),
+              GestureDetector(
+                  onTap: () async {
+                    final XFile? image = await ImagePicker()
+                        .pickImage(source: ImageSource.gallery);
+                    if (image != null) {
+                      setState(() {
+                        _selectedImage = File(image.path);
+                      });
+                    }
+                  },
+                  child: Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey.shade400, width: 1),
+                      color: Colors.grey[100],
+                    ),
+                    child: _selectedImage == null
+                        ? const Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.add_a_photo,
+                                  size: 40, color: Colors.grey),
+                              SizedBox(height: 8),
+                              Text("Choose Image",
+                                  style: TextStyle(color: Colors.grey)),
+                            ],
+                          )
+                        : ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.file(
+                              _selectedImage!,
+                              width: 120,
+                              height: 120,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                  )),
+              const SizedBox(height: 8),
+              const TextField(
+                decoration: InputDecoration(labelText: 'Meal Title'),
               ),
-              TextField(
-                decoration: const InputDecoration(labelText: 'Description'),
+              const TextField(
+                decoration: InputDecoration(labelText: 'Description'),
               ),
-              TextField(
-                decoration: const InputDecoration(labelText: 'Weekdays (e.g., Mon, Wed, Fri)'),
+              const SizedBox(height: 30),
+              SelectWeekDays(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                days: _days,
+                border: false,
+                width: MediaQuery.of(context).size.width / 1.4,
+                boxDecoration: BoxDecoration(
+                  color: Colors.red[700],
+                  borderRadius: BorderRadius.circular(30.0),
+                ),
+                onSelect: (values) {
+                  print(values);
+                },
               ),
             ],
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              onPressed: () => {Navigator.pop(context)},
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: Colors.black),
+              ),
             ),
-            ElevatedButton(
+            TextButton(
               onPressed: () {},
-              child: const Text('Add'),
+              child: const Text(
+                'Add',
+                style: TextStyle(color: Colors.black),
+              ),
             ),
           ],
         );
       },
-    );
+    ).then((val) {
+      setState(() {
+        _selectedImage = null;
+      });
+    });
   }
 
   Widget _buildOrderTab() {
