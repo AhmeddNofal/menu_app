@@ -39,6 +39,16 @@ class DatabaseService {
    
   )
 ''');
+      await db.execute('''
+  create table Orders (
+    _id integer primary key autoincrement,
+    meal integer not null,
+    user integer not null,
+    date text not null,
+    FOREIGN KEY (meal) REFERENCES Meals (_id),
+    FOREIGN KEY (user) REFERENCES Users (_id)
+  )
+''');
     });
   }
 
@@ -58,14 +68,13 @@ class DatabaseService {
   }
 
   Future addMeal(Meal meal) async {
-    var res = await db
-        .insert("Meals", meal.toMap());
+    var res = await db.insert("Meals", meal.toMap());
     return res;
   }
 
   Future<List<Meal>> getMeals() async {
     List<Map<String, Object?>> records = await db.query('Meals');
-    List<Meal> res = []; 
+    List<Meal> res = [];
     for (var m in records) {
       res.add(Meal.fromMap(m));
     }

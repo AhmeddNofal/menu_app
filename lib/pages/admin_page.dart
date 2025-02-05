@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:menu_app/cubits/dbService_cubit.dart';
 import 'package:menu_app/cubits/meal_cubit.dart';
 import 'package:menu_app/models/meal_model.dart';
@@ -31,6 +32,19 @@ class _AdminPageState extends State<AdminPage>
   String titleVal = "";
   String descriptionVal = "";
   List<String> weekdays = [];
+  DateTime date = DateTime.now();
+  String? dateFormat;
+  String? curWeekday;
+  static const weekdayIndexMap = {
+    "sunday": 0,
+    "monday": 1,
+    "tuesday": 2,
+    "wednesday": 3,
+    "thursday": 4,
+    "friday": 5,
+    "saturday": 6,
+  };
+  int? weekdayIndex;
 
   onItemTapped(int index) {
     setState(() {
@@ -45,6 +59,9 @@ class _AdminPageState extends State<AdminPage>
     _tabController.addListener(() {
       setState(() {
         _selectedIndex = _tabController.index;
+        dateFormat = DateFormat('dd-MM-yyyy').format(date);
+        curWeekday = DateFormat('EEEE').format(date).toLowerCase();
+        weekdayIndex = weekdayIndexMap[curWeekday];
       });
     });
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -355,38 +372,70 @@ class _AdminPageState extends State<AdminPage>
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          const Text(
-            'Choose a Meal',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
           const SizedBox(height: 5),
           Expanded(
-            child: ListView.builder(
-              itemCount: 5, // Example count
-              itemBuilder: (context, index) {
-                return Column(
-                  children: [
-                    Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.0),
-                      ),
-                      child: ListTile(
-                        leading: Image.asset('assets/pizza.jpg',
-                            width: 90, height: 90),
-                        title: Text('Meal Option $index'),
-                        subtitle: Text('Description of meal option $index'),
-                        trailing: ElevatedButton(
-                          onPressed: () {},
-                          child: const Text('Order'),
+              child: Column(
+            children: [
+              for (var meal in context.read<MealsCubit>().state)
+                if (meal.days[weekdayIndex!] == true)
+                  Column(
+                    children: [
+                      Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        child: ListTile(
+                          leading: Image.file(
+                            File(meal.image!),
+                            width: 80,
+                            height: 100,
+                            fit: BoxFit.cover,
+                          ),
+                          title: Text(meal.title!),
+                          subtitle: Text(meal.description!),
+                          trailing: ElevatedButton(
+                            onPressed: () {},
+                            child: Icon(
+                              Icons.add,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              shape: CircleBorder(),
+                              padding: EdgeInsets.all(10),
+                              backgroundColor: Colors.red[600],
+                              // <-- Splash color
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 5),
-                  ],
-                );
-              },
-            ),
+                      const SizedBox(height: 5),
+                    ],
+                  ),
+              const SizedBox(height: 5),
+            ],
+          )),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {},
+                  child: const Text(
+                    'Order',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(5))),
+                    padding: EdgeInsets.symmetric(vertical: 15),
+                    backgroundColor: Colors.red[600],
+                    // <-- Splash color
+                  ),
+                ),
+              ),
+            ],
           ),
+          const SizedBox(height: 8),
         ],
       ),
     );

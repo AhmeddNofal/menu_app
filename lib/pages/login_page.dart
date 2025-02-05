@@ -27,13 +27,16 @@ class _LoginPageState extends State<LoginPage> {
   Future initDB() async {
     await dbService.open();
     db = dbService.db;
-    //   await db?.execute('''
-    // create table Users (
-    //   _id integer primary key autoincrement,
-    //   admin integer not null,
-    //   email text not null,
-    //   password text not null
-    // )    ''');
+//     await db?.execute('''
+//   create table Orders (
+//     _id integer primary key autoincrement,
+//     meal integer not null,
+//     user integer not null,
+//     date text not null,
+//     FOREIGN KEY (meal) REFERENCES Meals (_id),
+//     FOREIGN KEY (user) REFERENCES Users (_id)
+//   )
+// ''');
     // await dbService.addUser();
     // User? res = await dbService.findUser("admin");
     context.read<DbserviceCubit>().update(dbService);
