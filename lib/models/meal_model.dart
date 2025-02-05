@@ -20,7 +20,14 @@ class Meal {
     title = map["title"];
     description = map["description"];
     image = map["image"];
-    days = map["days"];
+    days[0] = map["sunday"];
+    days[1] = map["monday"];
+    days[2] = map["tuesday"];
+    days[3] = map["wednesday"];
+    days[4] = map["thursday"];
+    days[5] = map["friday"];
+    days[6] = map["saturday"];
+
   }
 
   Map<String, Object?> toMap() {
@@ -28,7 +35,14 @@ class Meal {
       "title": title,
       "description": description,
       "image": image,
-      "days": days
+      "sunday": days[0],
+      "monday": days[1],
+      "tuesday": days[2],
+      "wednesday": days[3],
+      "thursday": days[4],
+      "friday": days[5],
+      "saturday": days[6],
+
     };
     if (id != null) {
       map["id"] = id;

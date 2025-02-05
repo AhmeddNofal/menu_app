@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:menu_app/cubits/dbService_cubit.dart';
+import 'package:menu_app/cubits/meal_cubit.dart';
 import 'package:menu_app/cubits/user_cubit.dart';
 import 'package:menu_app/models/user_model.dart';
 import 'package:menu_app/pages/login_page.dart';
@@ -19,8 +21,17 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => UserCubit(User()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<UserCubit>(
+          create: (_) => UserCubit(),
+        ),
+        BlocProvider<MealsCubit>(
+          create: (_) => MealsCubit(),
+        ),
+        BlocProvider<DbserviceCubit>(create: (_) => DbserviceCubit(),
+        ),
+      ],
       child: MaterialApp(
         title: 'Flutter Demo',
         home: const LoginPage(),

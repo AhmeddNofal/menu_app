@@ -1,10 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:menu_app/models/meal_model.dart';
 
-class MealCubit extends Cubit<Meal> {
-  MealCubit(super.initialState);
+class MealsCubit extends Cubit<List<Meal>> {
+  MealsCubit() : super([]);
 
-  void update(Meal meal) {
+  void update(List<Meal> meal) {
     emit(meal);
   }
 }

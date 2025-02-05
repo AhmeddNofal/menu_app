@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:menu_app/cubits/dbService_cubit.dart';
 import 'package:menu_app/cubits/user_cubit.dart';
 import 'package:menu_app/models/user_model.dart';
 import 'package:menu_app/pages/admin_page.dart';
@@ -34,7 +35,9 @@ class _LoginPageState extends State<LoginPage> {
     //   password text not null
     // )    ''');
     // await dbService.addUser();
-    User? res = await dbService.findUser("admin");
+    // User? res = await dbService.findUser("admin");
+    context.read<DbserviceCubit>().update(dbService);
+
     print("initState Called");
     // context
     //     .read<UserCubit>()
@@ -166,6 +169,5 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
-    ;
   }
 }

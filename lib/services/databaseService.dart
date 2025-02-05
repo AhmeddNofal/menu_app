@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:menu_app/models/meal_model.dart';
 import 'package:menu_app/models/user_model.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
@@ -22,6 +23,22 @@ class DatabaseService {
     password text not null
   )
 ''');
+      await db.execute('''
+  create table Meals (
+    _id integer primary key autoincrement,
+    title text not null,
+    description text not null,
+    image text not null,
+    sunday integer not null,
+    monday integer not null,
+    tuesday integer not null,
+    wednesday integer not null,
+    thursday integer not null,
+    friday integer not null,
+    saturday integer not null,
+   
+  )
+''');
     });
   }
 
@@ -39,4 +56,12 @@ class DatabaseService {
     }
     return null;
   }
+
+  Future addMeal(Meal meal) async {
+    var res = await db
+        .insert("Meals", meal.toMap());
+    return res;
+  }
+
+  
 }
