@@ -71,4 +71,8 @@ class DatabaseService {
     }
     return res;
   }
+
+  Future<int> deleteMeal(Meal meal) async {
+    return await db.delete("Meals", where: '_id = ?', whereArgs: [meal.id]);
+  }
 }

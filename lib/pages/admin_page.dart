@@ -4,6 +4,7 @@ import 'package:day_picker/day_picker.dart';
 import 'package:day_picker/model/day_in_week.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:menu_app/cubits/dbService_cubit.dart';
 import 'package:menu_app/cubits/meal_cubit.dart';
@@ -41,6 +42,11 @@ class _AdminPageState extends State<AdminPage>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      setState(() {
+        _selectedIndex = _tabController.index;
+      });
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       setState(() => dbService = context.read<DbserviceCubit>().state);
       List<Meal>? mealList = await dbService?.getMeals();
@@ -101,60 +107,82 @@ class _AdminPageState extends State<AdminPage>
                 for (var meal in context.read<MealsCubit>().state)
                   Column(
                     children: [
-                      Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                        child: ListTile(
-                          leading: Image.file(
-                            File(
-                              meal.image!,
+                      Slidable(
+                        startActionPane: ActionPane(
+                          motion: const StretchMotion(),
+                          children: [
+                            SlidableAction(
+                              onPressed: (_) async {
+                                await dbService!.deleteMeal(meal);
+                                List<Meal>? mealList =
+                                    await dbService?.getMeals();
+                                if (mealList != null) {
+                                  setState(() {
+                                    context.read<MealsCubit>().update(mealList);
+                                  });
+                                }
+                              },
+                              backgroundColor: Colors.red.shade700,
+                              icon: Icons.delete,
+                              borderRadius: BorderRadius.circular(15),
                             ),
-                            width: 80,
-                            height: 100,
-                            fit: BoxFit.cover,
+                          ],
+                        ),
+                        child: Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.0),
                           ),
-                          title: Text(meal.title!),
-                          subtitle: Text(meal.description!),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text("S ",
-                                  style: TextStyle(
-                                      color: meal.days[0]
-                                          ? Colors.red[600]
-                                          : Colors.grey)),
-                              Text("M ",
-                                  style: TextStyle(
-                                      color: meal.days[1]
-                                          ? Colors.red[600]
-                                          : Colors.grey)),
-                              Text("T ",
-                                  style: TextStyle(
-                                      color: meal.days[2]
-                                          ? Colors.red[600]
-                                          : Colors.grey)),
-                              Text("W ",
-                                  style: TextStyle(
-                                      color: meal.days[3]
-                                          ? Colors.red[600]
-                                          : Colors.grey)),
-                              Text("T ",
-                                  style: TextStyle(
-                                      color: meal.days[4]
-                                          ? Colors.red[600]
-                                          : Colors.grey)),
-                              Text("F ",
-                                  style: TextStyle(
-                                      color: meal.days[5]
-                                          ? Colors.red[600]
-                                          : Colors.grey)),
-                              Text("S ",
-                                  style: TextStyle(
-                                      color: meal.days[6]
-                                          ? Colors.red[600]
-                                          : Colors.grey)),
-                            ],
+                          child: ListTile(
+                            leading: Image.file(
+                              File(
+                                meal.image!,
+                              ),
+                              width: 80,
+                              height: 100,
+                              fit: BoxFit.cover,
+                            ),
+                            title: Text(meal.title!),
+                            subtitle: Text(meal.description!),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text("S ",
+                                    style: TextStyle(
+                                        color: meal.days[0]
+                                            ? Colors.red[600]
+                                            : Colors.grey)),
+                                Text("M ",
+                                    style: TextStyle(
+                                        color: meal.days[1]
+                                            ? Colors.red[600]
+                                            : Colors.grey)),
+                                Text("T ",
+                                    style: TextStyle(
+                                        color: meal.days[2]
+                                            ? Colors.red[600]
+                                            : Colors.grey)),
+                                Text("W ",
+                                    style: TextStyle(
+                                        color: meal.days[3]
+                                            ? Colors.red[600]
+                                            : Colors.grey)),
+                                Text("T ",
+                                    style: TextStyle(
+                                        color: meal.days[4]
+                                            ? Colors.red[600]
+                                            : Colors.grey)),
+                                Text("F ",
+                                    style: TextStyle(
+                                        color: meal.days[5]
+                                            ? Colors.red[600]
+                                            : Colors.grey)),
+                                Text("S ",
+                                    style: TextStyle(
+                                        color: meal.days[6]
+                                            ? Colors.red[600]
+                                            : Colors.grey)),
+                              ],
+                            ),
                           ),
                         ),
                       ),
