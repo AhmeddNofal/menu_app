@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:menu_app/models/meal_model.dart';
+import 'package:menu_app/models/order_model.dart';
 import 'package:menu_app/models/user_model.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
@@ -83,5 +84,20 @@ class DatabaseService {
 
   Future<int> deleteMeal(Meal meal) async {
     return await db.delete("Meals", where: '_id = ?', whereArgs: [meal.id]);
+  }
+
+  Future addOrder(Order order) async {
+    var res = await db.insert("Orders", order.toMap());
+    return res;
+  }
+
+  Future<Order?> getTodayOrder(String date) async {
+    List<Map<String, Object?>> maps =
+        await db.query("Orders", where: 'date = ?', whereArgs: [date]);
+    if (maps.isNotEmpty) {
+      print(maps.first);
+      return Order.fromMap(maps.first);
+    }
+    return null;
   }
 }

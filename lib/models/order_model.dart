@@ -10,7 +10,7 @@ class Order {
     id = map["_id"];
     mealId = map["meal"];
     userId = map["user"];
-    date = map[date];
+    date = map["date"];
   }
 
   Map<String, Object?> toMap() {
