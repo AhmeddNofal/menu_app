@@ -49,7 +49,7 @@ class DatabaseService {
   }
 
   Future<User?> findUser(String email) async {
-    List<Map<String, dynamic>> maps =
+    List<Map<String, Object?>> maps =
         await db.query("Users", where: 'email = ?', whereArgs: [email]);
     if (maps.isNotEmpty) {
       return User.fromMap(maps.first);
@@ -63,5 +63,13 @@ class DatabaseService {
     return res;
   }
 
-  
+  Future<List<Meal>> getMeals() async {
+    List<Map<String, Object?>> records = await db.query('Meals');
+    print(records);
+    List<Meal> res = []; 
+    for (var m in records) {
+      res.add(Meal.fromMap(m));
+    }
+    return res;
+  }
 }

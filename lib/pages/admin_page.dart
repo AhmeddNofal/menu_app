@@ -231,7 +231,7 @@ class _AdminPageState extends State<AdminPage>
               ),
             ),
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 if (titleVal != "" &&
                     descriptionVal != "" &&
                     imagePath != null) {
@@ -243,6 +243,8 @@ class _AdminPageState extends State<AdminPage>
                     newMeal.days[int.parse(day)] = true;
                   }
                   dbService?.addMeal(newMeal);
+                  List<Meal>? mealList = await dbService?.getMeals();
+                  print(mealList);
                   Navigator.pop(context);
                 }
               },
@@ -261,6 +263,8 @@ class _AdminPageState extends State<AdminPage>
         titleVal = "";
         descriptionVal = "";
         weekdays = [];
+        _titleController.clear();
+        _descriptionController.clear();
       });
     });
   }
