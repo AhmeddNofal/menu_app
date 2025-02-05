@@ -65,7 +65,6 @@ class DatabaseService {
 
   Future<List<Meal>> getMeals() async {
     List<Map<String, Object?>> records = await db.query('Meals');
-    print(records);
     List<Meal> res = []; 
     for (var m in records) {
       res.add(Meal.fromMap(m));

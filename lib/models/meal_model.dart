@@ -20,13 +20,13 @@ class Meal {
     title = map["title"];
     description = map["description"];
     image = map["image"];
-    days[0] = map["sunday"] == "1";
-    days[1] = map["monday"] == "1";
-    days[2] = map["tuesday"] == "1";
-    days[3] = map["wednesday"] == "1";
-    days[4] = map["thursday"] == "1";
-    days[5] = map["friday"] == "1";
-    days[6] = map["saturday"] == "1";
+    days[0] = map["sunday"] == 1;
+    days[1] = map["monday"] == 1;
+    days[2] = map["tuesday"] == 1;
+    days[3] = map["wednesday"] == 1;
+    days[4] = map["thursday"] == 1;
+    days[5] = map["friday"] == 1;
+    days[6] = map["saturday"] == 1;
 
   }
 

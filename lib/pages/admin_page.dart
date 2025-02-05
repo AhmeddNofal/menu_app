@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:menu_app/cubits/dbService_cubit.dart';
+import 'package:menu_app/cubits/meal_cubit.dart';
 import 'package:menu_app/models/meal_model.dart';
 import 'package:menu_app/services/databaseService.dart';
 import 'package:sqflite/sqflite.dart';
@@ -40,8 +41,12 @@ class _AdminPageState extends State<AdminPage>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       setState(() => dbService = context.read<DbserviceCubit>().state);
+      List<Meal>? mealList = await dbService?.getMeals();
+      if (mealList != null) {
+        context.read<MealsCubit>().update(mealList);
+      }
     });
   }
 
@@ -89,33 +94,75 @@ class _AdminPageState extends State<AdminPage>
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          // ElevatedButton(
-          //   onPressed: () {},
-          //   child: const Text('Add Meal'),
-          // ),
           const SizedBox(height: 5),
           Expanded(
-            child: ListView.builder(
-              itemCount: 5, // Example count
-              itemBuilder: (context, index) {
-                return Column(
-                  children: [
-                    Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.0),
+            child: ListView(
+              children: [
+                for (var meal in context.read<MealsCubit>().state)
+                  Column(
+                    children: [
+                      Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        child: ListTile(
+                          leading: Image.file(
+                            File(
+                              meal.image!,
+                            ),
+                            width: 80,
+                            height: 100,
+                            fit: BoxFit.cover,
+                          ),
+                          title: Text(meal.title!),
+                          subtitle: Text(meal.description!),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text("S ",
+                                  style: TextStyle(
+                                      color: meal.days[0]
+                                          ? Colors.red[600]
+                                          : Colors.grey)),
+                              Text("M ",
+                                  style: TextStyle(
+                                      color: meal.days[1]
+                                          ? Colors.red[600]
+                                          : Colors.grey)),
+                              Text("T ",
+                                  style: TextStyle(
+                                      color: meal.days[2]
+                                          ? Colors.red[600]
+                                          : Colors.grey)),
+                              Text("W ",
+                                  style: TextStyle(
+                                      color: meal.days[3]
+                                          ? Colors.red[600]
+                                          : Colors.grey)),
+                              Text("T ",
+                                  style: TextStyle(
+                                      color: meal.days[4]
+                                          ? Colors.red[600]
+                                          : Colors.grey)),
+                              Text("F ",
+                                  style: TextStyle(
+                                      color: meal.days[5]
+                                          ? Colors.red[600]
+                                          : Colors.grey)),
+                              Text("S ",
+                                  style: TextStyle(
+                                      color: meal.days[6]
+                                          ? Colors.red[600]
+                                          : Colors.grey)),
+                            ],
+                          ),
+                        ),
                       ),
-                      child: ListTile(
-                        leading: Image.asset('assets/pizza.jpg',
-                            width: 90, height: 90),
-                        title: Text('Meal Title $index'),
-                        subtitle: Text('Description of meal $index'),
-                        trailing: const Text('S M T W T F S'),
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                  ],
-                );
-              },
+                      const SizedBox(height: 5),
+                    ],
+                  ),
+                const SizedBox(height: 40),
+              ],
             ),
           ),
         ],
@@ -136,125 +183,131 @@ class _AdminPageState extends State<AdminPage>
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Center(child: Text('Add Meal')),
-          scrollable: true,
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 8),
-              GestureDetector(
-                  onTap: () async {
-                    final XFile? image = await ImagePicker()
-                        .pickImage(source: ImageSource.gallery);
-                    if (image != null) {
-                      setState(() {
-                        _selectedImage = File(image.path);
-                        imagePath = image.path;
-                      });
-                    }
-                  },
-                  child: Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey.shade400, width: 1),
-                      color: Colors.grey[100],
-                    ),
-                    child: _selectedImage == null
-                        ? const Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.add_a_photo,
-                                  size: 40, color: Colors.grey),
-                              SizedBox(height: 8),
-                              Text("Choose Image",
-                                  style: TextStyle(color: Colors.grey)),
-                            ],
-                          )
-                        : ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.file(
-                              _selectedImage!,
-                              width: 120,
-                              height: 120,
-                              fit: BoxFit.cover,
+        return StatefulBuilder(builder: (context, setStateDialog) {
+          return AlertDialog(
+            title: const Center(child: Text('Add Meal')),
+            scrollable: true,
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 8),
+                GestureDetector(
+                    onTap: () async {
+                      final XFile? image = await ImagePicker()
+                          .pickImage(source: ImageSource.gallery);
+                      if (image != null) {
+                        setState(() {
+                          _selectedImage = File(image.path);
+                          imagePath = image.path;
+                        });
+                        setStateDialog(() {});
+                      }
+                    },
+                    child: Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        border:
+                            Border.all(color: Colors.grey.shade400, width: 1),
+                        color: Colors.grey[100],
+                      ),
+                      child: _selectedImage == null
+                          ? const Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.add_a_photo,
+                                    size: 40, color: Colors.grey),
+                                SizedBox(height: 8),
+                                Text("Choose Image",
+                                    style: TextStyle(color: Colors.grey)),
+                              ],
+                            )
+                          : ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.file(
+                                _selectedImage!,
+                                width: 120,
+                                height: 120,
+                                fit: BoxFit.cover,
+                              ),
                             ),
-                          ),
-                  )),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _titleController,
-                onChanged: (value) => {
-                  setState(() {
-                    titleVal = value;
-                  })
-                },
-                decoration: InputDecoration(labelText: 'Meal Title'),
-              ),
-              TextField(
-                controller: _descriptionController,
-                onChanged: (value) => {
-                  setState(() {
-                    descriptionVal = value;
-                  })
-                },
-                decoration: InputDecoration(labelText: 'Description'),
-              ),
-              const SizedBox(height: 30),
-              SelectWeekDays(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                days: _days,
-                border: false,
-                width: MediaQuery.of(context).size.width / 1.4,
-                boxDecoration: BoxDecoration(
-                  color: Colors.red[700],
-                  borderRadius: BorderRadius.circular(30.0),
+                    )),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: _titleController,
+                  onChanged: (value) => {
+                    setState(() {
+                      titleVal = value;
+                    })
+                  },
+                  decoration: InputDecoration(labelText: 'Meal Title'),
                 ),
-                onSelect: (values) {
-                  setState(() {
-                    weekdays = values;
-                  });
-                  print(weekdays);
+                TextField(
+                  controller: _descriptionController,
+                  onChanged: (value) => {
+                    setState(() {
+                      descriptionVal = value;
+                    })
+                  },
+                  decoration: InputDecoration(labelText: 'Description'),
+                ),
+                const SizedBox(height: 30),
+                SelectWeekDays(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  days: _days,
+                  border: false,
+                  width: MediaQuery.of(context).size.width / 1.4,
+                  boxDecoration: BoxDecoration(
+                    color: Colors.red[700],
+                    borderRadius: BorderRadius.circular(30.0),
+                  ),
+                  onSelect: (values) {
+                    setState(() {
+                      weekdays = values;
+                    });
+                    print(weekdays);
+                  },
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => {Navigator.pop(context)},
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(color: Colors.black),
+                ),
+              ),
+              TextButton(
+                onPressed: () async {
+                  if (titleVal != "" &&
+                      descriptionVal != "" &&
+                      imagePath != null) {
+                    Meal newMeal = Meal(
+                        title: titleVal,
+                        description: descriptionVal,
+                        image: imagePath);
+                    for (var day in weekdays) {
+                      newMeal.days[int.parse(day)] = true;
+                    }
+                    dbService?.addMeal(newMeal);
+                    List<Meal>? mealList = await dbService?.getMeals();
+                    if (mealList != null) {
+                      context.read<MealsCubit>().update(mealList);
+                    }
+                    Navigator.pop(context);
+                  }
                 },
+                child: const Text(
+                  'Add',
+                  style: TextStyle(color: Colors.black),
+                ),
               ),
             ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => {Navigator.pop(context)},
-              child: const Text(
-                'Cancel',
-                style: TextStyle(color: Colors.black),
-              ),
-            ),
-            TextButton(
-              onPressed: () async {
-                if (titleVal != "" &&
-                    descriptionVal != "" &&
-                    imagePath != null) {
-                  Meal newMeal = Meal(
-                      title: titleVal,
-                      description: descriptionVal,
-                      image: imagePath);
-                  for (var day in weekdays) {
-                    newMeal.days[int.parse(day)] = true;
-                  }
-                  dbService?.addMeal(newMeal);
-                  List<Meal>? mealList = await dbService?.getMeals();
-                  print(mealList);
-                  Navigator.pop(context);
-                }
-              },
-              child: const Text(
-                'Add',
-                style: TextStyle(color: Colors.black),
-              ),
-            ),
-          ],
-        );
+          );
+        });
       },
     ).then((val) {
       setState(() {
