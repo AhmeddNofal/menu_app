@@ -14,7 +14,7 @@ class Order {
   }
 
   Map<String, Object?> toMap() {
-    var map = {"meal": mealId, "user": userId, "date": date};
+    var map = {"_id": id, "meal": mealId, "user": userId, "date": date};
     return map;
   }
 }

@@ -82,6 +82,11 @@ class DatabaseService {
     return res;
   }
 
+  Future updateMeal(Meal meal) async {
+    return await db.update("Meals", meal.toMap(),
+        where: '_id = ?', whereArgs: [meal.id]);
+  }
+
   Future<int> deleteMeal(Meal meal) async {
     return await db.delete("Meals", where: '_id = ?', whereArgs: [meal.id]);
   }
@@ -91,9 +96,9 @@ class DatabaseService {
     return res;
   }
 
-  Future<Order?> getTodayOrder(String date) async {
+  Future<Order?> getTodayOrder(int user, String date) async {
     List<Map<String, Object?>> maps =
-        await db.query("Orders", where: 'date = ?', whereArgs: [date]);
+        await db.query("Orders", where: 'date = ? and user = ?', whereArgs: [date, user]);
     if (maps.isNotEmpty) {
       print(maps.first);
       return Order.fromMap(maps.first);

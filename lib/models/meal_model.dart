@@ -45,7 +45,7 @@ class Meal {
 
     };
     if (id != null) {
-      map["id"] = id;
+      map["_id"] = id;
     }
 
     return map;

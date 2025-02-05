@@ -85,6 +85,10 @@ class _AdminPageState extends State<AdminPage>
       if (mealList != null) {
         context.read<MealsCubit>().update(mealList);
       }
+      Order? order = await dbService?.getTodayOrder(context.read<UserCubit>().state.id!, dateFormat!);
+      setState(() {
+        todayOrder = order;
+      });
     });
   }
 
@@ -160,60 +164,65 @@ class _AdminPageState extends State<AdminPage>
                             ),
                           ],
                         ),
-                        child: Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-                          child: ListTile(
-                            leading: Image.file(
-                              File(
-                                meal.image!,
-                              ),
-                              width: 80,
-                              height: 100,
-                              fit: BoxFit.cover,
+                        child: GestureDetector(
+                          onLongPress: () {
+                            _showEditMealDialog(context, meal);
+                          },
+                          child: Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12.0),
                             ),
-                            title: Text(meal.title!),
-                            subtitle: Text(meal.description!),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text("S ",
-                                    style: TextStyle(
-                                        color: meal.days[0]
-                                            ? Colors.red[600]
-                                            : Colors.grey)),
-                                Text("M ",
-                                    style: TextStyle(
-                                        color: meal.days[1]
-                                            ? Colors.red[600]
-                                            : Colors.grey)),
-                                Text("T ",
-                                    style: TextStyle(
-                                        color: meal.days[2]
-                                            ? Colors.red[600]
-                                            : Colors.grey)),
-                                Text("W ",
-                                    style: TextStyle(
-                                        color: meal.days[3]
-                                            ? Colors.red[600]
-                                            : Colors.grey)),
-                                Text("T ",
-                                    style: TextStyle(
-                                        color: meal.days[4]
-                                            ? Colors.red[600]
-                                            : Colors.grey)),
-                                Text("F ",
-                                    style: TextStyle(
-                                        color: meal.days[5]
-                                            ? Colors.red[600]
-                                            : Colors.grey)),
-                                Text("S ",
-                                    style: TextStyle(
-                                        color: meal.days[6]
-                                            ? Colors.red[600]
-                                            : Colors.grey)),
-                              ],
+                            child: ListTile(
+                              leading: Image.file(
+                                File(
+                                  meal.image!,
+                                ),
+                                width: 80,
+                                height: 100,
+                                fit: BoxFit.cover,
+                              ),
+                              title: Text(meal.title!),
+                              subtitle: Text(meal.description!),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text("S ",
+                                      style: TextStyle(
+                                          color: meal.days[0]
+                                              ? Colors.red[600]
+                                              : Colors.grey)),
+                                  Text("M ",
+                                      style: TextStyle(
+                                          color: meal.days[1]
+                                              ? Colors.red[600]
+                                              : Colors.grey)),
+                                  Text("T ",
+                                      style: TextStyle(
+                                          color: meal.days[2]
+                                              ? Colors.red[600]
+                                              : Colors.grey)),
+                                  Text("W ",
+                                      style: TextStyle(
+                                          color: meal.days[3]
+                                              ? Colors.red[600]
+                                              : Colors.grey)),
+                                  Text("T ",
+                                      style: TextStyle(
+                                          color: meal.days[4]
+                                              ? Colors.red[600]
+                                              : Colors.grey)),
+                                  Text("F ",
+                                      style: TextStyle(
+                                          color: meal.days[5]
+                                              ? Colors.red[600]
+                                              : Colors.grey)),
+                                  Text("S ",
+                                      style: TextStyle(
+                                          color: meal.days[6]
+                                              ? Colors.red[600]
+                                              : Colors.grey)),
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -382,6 +391,80 @@ class _AdminPageState extends State<AdminPage>
     });
   }
 
+  void _showEditMealDialog(BuildContext context, Meal meal) {
+    final List<DayInWeek> _days = [
+      DayInWeek("S", dayKey: "0"),
+      DayInWeek("M", dayKey: "1"),
+      DayInWeek("T", dayKey: "2"),
+      DayInWeek("W", dayKey: "3"),
+      DayInWeek("T", dayKey: "4"),
+      DayInWeek("F", dayKey: "5"),
+      DayInWeek("S", dayKey: "6"),
+    ];
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(builder: (context, setStateDialog) {
+          return AlertDialog(
+            title: const Center(child: Text('Reschedule Meal')),
+            scrollable: true,
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 8),
+                SelectWeekDays(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  days: _days,
+                  border: false,
+                  width: MediaQuery.of(context).size.width / 1.4,
+                  boxDecoration: BoxDecoration(
+                    color: Colors.red[700],
+                    borderRadius: BorderRadius.circular(30.0),
+                  ),
+                  onSelect: (values) {
+                    setState(() {
+                      weekdays = values;
+                    });
+                    print(weekdays);
+                  },
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => {Navigator.pop(context)},
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(color: Colors.black),
+                ),
+              ),
+              TextButton(
+                onPressed: () async {
+                  meal.days = [false, false, false, false, false, false, false];
+                  for (var day in weekdays) {
+                    meal.days[int.parse(day)] = true;
+                  }
+                  print(meal.id);
+                  dbService?.updateMeal(meal);
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  'Add',
+                  style: TextStyle(color: Colors.black),
+                ),
+              ),
+            ],
+          );
+        });
+      },
+    ).then((val) {
+      setState(() {
+        weekdays = [];
+      });
+    });
+  }
+
   Widget _buildOrderTab() {
     return todayOrder != null
         ? Column(
@@ -495,7 +578,7 @@ class _AdminPageState extends State<AdminPage>
                                     date: dateFormat);
                                 await dbService?.addOrder(order);
                                 order =
-                                    await dbService?.getTodayOrder(dateFormat!);
+                                    await dbService?.getTodayOrder(context.read<UserCubit>().state.id!, dateFormat!);
                                 setState(() {
                                   todayOrder = order;
                                 });

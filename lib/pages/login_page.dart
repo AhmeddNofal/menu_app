@@ -56,9 +56,10 @@ class _LoginPageState extends State<LoginPage> {
       user = await dbService.findUser(email);
     }
     if (user != null && user.password == password) {
+      context.read<UserCubit>().update(user);
+
       if (user.admin!) {
         // ignore: use_build_context_synchronously
-        context.read<UserCubit>().update(user);
 
         Navigator.pushReplacement<void, void>(
           // ignore: use_build_context_synchronously
