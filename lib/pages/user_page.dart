@@ -35,6 +35,7 @@ class _UserPageState extends State<UserPage> {
   int? weekdayIndex;
   Meal? mealOrdered;
   Order? todayOrder;
+  String mealSearch1 = "";
 
   Meal? findMeal(int id) {
     for (var meal in context.read<MealsCubit>().state) {
@@ -115,12 +116,43 @@ class _UserPageState extends State<UserPage> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: TextField(
+                      onChanged: (value) {
+                        setState(() {
+                          mealSearch1 = value;
+                        });
+                      },
+                      decoration: InputDecoration(
+                        hintText: 'Search Meals',
+                        hintStyle: TextStyle(color: Colors.grey[600]),
+                        filled: true,
+                        fillColor: Color.fromARGB(106, 244, 241, 241),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: Colors.grey, width: 0.5),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                            color: Colors.grey,
+                          ),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 5),
                   Expanded(
                       child: ListView(
                     children: [
                       for (var meal in context.read<MealsCubit>().state)
-                        if (meal.days[weekdayIndex!] == true)
+                        if (meal.days[weekdayIndex!] == true &&
+                            (mealSearch1 == "" ||
+                                meal.title!
+                                    .toLowerCase()
+                                    .contains(mealSearch1.toLowerCase())))
                           Column(
                             children: [
                               Card(

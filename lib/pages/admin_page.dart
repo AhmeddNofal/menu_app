@@ -49,6 +49,8 @@ class _AdminPageState extends State<AdminPage>
   int? weekdayIndex;
   Meal? mealOrdered;
   Order? todayOrder;
+  String mealSearch1 = "";
+  String mealSearch2 = "";
 
   onItemTapped(int index) {
     setState(() {
@@ -85,7 +87,8 @@ class _AdminPageState extends State<AdminPage>
       if (mealList != null) {
         context.read<MealsCubit>().update(mealList);
       }
-      Order? order = await dbService?.getTodayOrder(context.read<UserCubit>().state.id!, dateFormat!);
+      Order? order = await dbService?.getTodayOrder(
+          context.read<UserCubit>().state.id!, dateFormat!);
       setState(() {
         todayOrder = order;
       });
@@ -133,103 +136,135 @@ class _AdminPageState extends State<AdminPage>
 
   Widget _buildMealsTab() {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(12.0),
       child: Column(
         children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: TextField(
+              onChanged: (value) {
+                setState(() {
+                  mealSearch1 = value;
+                });
+              },
+              decoration: InputDecoration(
+                hintText: 'Search Meals',
+                hintStyle: TextStyle(color: Colors.grey[600]),
+                filled: true,
+                fillColor: Color.fromARGB(106, 244, 241, 241),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.grey, width: 0.5),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(
+                    color: Colors.grey,
+                  ),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+              ),
+            ),
+          ),
           const SizedBox(height: 5),
           Expanded(
             child: ListView(
               children: [
                 for (var meal in context.read<MealsCubit>().state)
-                  Column(
-                    children: [
-                      Slidable(
-                        startActionPane: ActionPane(
-                          motion: const StretchMotion(),
-                          children: [
-                            SlidableAction(
-                              onPressed: (_) async {
-                                await dbService!.deleteMeal(meal);
-                                List<Meal>? mealList =
-                                    await dbService?.getMeals();
-                                if (mealList != null) {
-                                  setState(() {
-                                    context.read<MealsCubit>().update(mealList);
-                                  });
-                                }
-                              },
-                              backgroundColor: Colors.red.shade700,
-                              icon: Icons.delete,
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                          ],
-                        ),
-                        child: GestureDetector(
-                          onLongPress: () {
-                            _showEditMealDialog(context, meal);
-                          },
-                          child: Card(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                            child: ListTile(
-                              leading: Image.file(
-                                File(
-                                  meal.image!,
-                                ),
-                                width: 80,
-                                height: 100,
-                                fit: BoxFit.cover,
+                  if (mealSearch1 == "" ||
+                      meal.title!
+                          .toLowerCase()
+                          .contains(mealSearch1.toLowerCase()))
+                    Column(
+                      children: [
+                        Slidable(
+                          startActionPane: ActionPane(
+                            motion: const StretchMotion(),
+                            children: [
+                              SlidableAction(
+                                onPressed: (_) async {
+                                  await dbService!.deleteMeal(meal);
+                                  List<Meal>? mealList =
+                                      await dbService?.getMeals();
+                                  if (mealList != null) {
+                                    setState(() {
+                                      context
+                                          .read<MealsCubit>()
+                                          .update(mealList);
+                                    });
+                                  }
+                                },
+                                backgroundColor: Colors.red.shade700,
+                                icon: Icons.delete,
+                                borderRadius: BorderRadius.circular(15),
                               ),
-                              title: Text(meal.title!),
-                              subtitle: Text(meal.description!),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text("S ",
-                                      style: TextStyle(
-                                          color: meal.days[0]
-                                              ? Colors.red[600]
-                                              : Colors.grey)),
-                                  Text("M ",
-                                      style: TextStyle(
-                                          color: meal.days[1]
-                                              ? Colors.red[600]
-                                              : Colors.grey)),
-                                  Text("T ",
-                                      style: TextStyle(
-                                          color: meal.days[2]
-                                              ? Colors.red[600]
-                                              : Colors.grey)),
-                                  Text("W ",
-                                      style: TextStyle(
-                                          color: meal.days[3]
-                                              ? Colors.red[600]
-                                              : Colors.grey)),
-                                  Text("T ",
-                                      style: TextStyle(
-                                          color: meal.days[4]
-                                              ? Colors.red[600]
-                                              : Colors.grey)),
-                                  Text("F ",
-                                      style: TextStyle(
-                                          color: meal.days[5]
-                                              ? Colors.red[600]
-                                              : Colors.grey)),
-                                  Text("S ",
-                                      style: TextStyle(
-                                          color: meal.days[6]
-                                              ? Colors.red[600]
-                                              : Colors.grey)),
-                                ],
+                            ],
+                          ),
+                          child: GestureDetector(
+                            onLongPress: () {
+                              _showEditMealDialog(context, meal);
+                            },
+                            child: Card(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              child: ListTile(
+                                leading: Image.file(
+                                  File(
+                                    meal.image!,
+                                  ),
+                                  width: 80,
+                                  height: 100,
+                                  fit: BoxFit.cover,
+                                ),
+                                title: Text(meal.title!),
+                                subtitle: Text(meal.description!),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text("S ",
+                                        style: TextStyle(
+                                            color: meal.days[0]
+                                                ? Colors.red[600]
+                                                : Colors.grey)),
+                                    Text("M ",
+                                        style: TextStyle(
+                                            color: meal.days[1]
+                                                ? Colors.red[600]
+                                                : Colors.grey)),
+                                    Text("T ",
+                                        style: TextStyle(
+                                            color: meal.days[2]
+                                                ? Colors.red[600]
+                                                : Colors.grey)),
+                                    Text("W ",
+                                        style: TextStyle(
+                                            color: meal.days[3]
+                                                ? Colors.red[600]
+                                                : Colors.grey)),
+                                    Text("T ",
+                                        style: TextStyle(
+                                            color: meal.days[4]
+                                                ? Colors.red[600]
+                                                : Colors.grey)),
+                                    Text("F ",
+                                        style: TextStyle(
+                                            color: meal.days[5]
+                                                ? Colors.red[600]
+                                                : Colors.grey)),
+                                    Text("S ",
+                                        style: TextStyle(
+                                            color: meal.days[6]
+                                                ? Colors.red[600]
+                                                : Colors.grey)),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 5),
-                    ],
-                  ),
+                        const SizedBox(height: 5),
+                      ],
+                    ),
                 const SizedBox(height: 40),
               ],
             ),
@@ -500,12 +535,42 @@ class _AdminPageState extends State<AdminPage>
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: TextField(
+                    onChanged: (value) {
+                      setState(() {
+                        mealSearch2 = value;
+                      });
+                    },
+                    decoration: InputDecoration(
+                      hintText: 'Search Meals',
+                      hintStyle: TextStyle(color: Colors.grey[600]),
+                      filled: true,
+                      fillColor: Color.fromARGB(106, 244, 241, 241),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey, width: 0.5),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: const BorderSide(
+                          color: Colors.grey,
+                        ),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 5),
                 Expanded(
                     child: Column(
                   children: [
                     for (var meal in context.read<MealsCubit>().state)
-                      if (meal.days[weekdayIndex!] == true)
+                      if (meal.days[weekdayIndex!] == true &&
+                              (mealSearch2 == "" ||
+                          meal.title!
+                              .toLowerCase()
+                              .contains(mealSearch2.toLowerCase())))
                         Column(
                           children: [
                             Card(
@@ -577,8 +642,9 @@ class _AdminPageState extends State<AdminPage>
                                     userId: context.read<UserCubit>().state.id,
                                     date: dateFormat);
                                 await dbService?.addOrder(order);
-                                order =
-                                    await dbService?.getTodayOrder(context.read<UserCubit>().state.id!, dateFormat!);
+                                order = await dbService?.getTodayOrder(
+                                    context.read<UserCubit>().state.id!,
+                                    dateFormat!);
                                 setState(() {
                                   todayOrder = order;
                                 });

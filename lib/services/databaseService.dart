@@ -50,6 +50,10 @@ class DatabaseService {
     FOREIGN KEY (user) REFERENCES Users (_id)
   )
 ''');
+      await db
+          .insert("Users", {"admin": 0, "email": "guest", "password": "123"});
+      await db
+          .insert("Users", {"admin": 1, "email": "admin", "password": "123"});
     });
   }
 
@@ -83,8 +87,8 @@ class DatabaseService {
   }
 
   Future updateMeal(Meal meal) async {
-    return await db.update("Meals", meal.toMap(),
-        where: '_id = ?', whereArgs: [meal.id]);
+    return await db
+        .update("Meals", meal.toMap(), where: '_id = ?', whereArgs: [meal.id]);
   }
 
   Future<int> deleteMeal(Meal meal) async {
@@ -97,8 +101,8 @@ class DatabaseService {
   }
 
   Future<Order?> getTodayOrder(int user, String date) async {
-    List<Map<String, Object?>> maps =
-        await db.query("Orders", where: 'date = ? and user = ?', whereArgs: [date, user]);
+    List<Map<String, Object?>> maps = await db.query("Orders",
+        where: 'date = ? and user = ?', whereArgs: [date, user]);
     if (maps.isNotEmpty) {
       print(maps.first);
       return Order.fromMap(maps.first);
